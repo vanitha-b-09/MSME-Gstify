@@ -1,7 +1,3 @@
-Great — here’s a **clean, professional README.md with emojis** (balanced so it still looks serious for reviewers and GitHub) 👇
-
----
-
 # 🚀 AI-Powered Invoice Intelligence System for MSMEs
 
 ---
