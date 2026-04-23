@@ -1,0 +1,87 @@
+### AI Engine - Module 5 Test File
+### Install "REST Client" extension in VS Code, then click "Send Request" above each ###
+
+### ✅ Test 1 — Health Check (make sure server is running)
+GET http://localhost:3000
+
+###
+
+### ✅ Test 2 — Basic GST Notice (Section 73 mismatch)
+POST http://localhost:3000/api/generate-response
+Content-Type: application/json
+
+{
+  "notice": {
+    "type": "SCN",
+    "gstin": "27AAPFU0939F1ZV",
+    "sections": ["Section 73"],
+    "date": "2024-01-15",
+    "tax_period": "Oct 2023",
+    "amount": "240000"
+  },
+  "mismatches": [
+    {
+      "field": "GSTR-1 vs 3B",
+      "diff": "240000",
+      "month": "Oct 2023"
+    }
+  ]
+}
+
+###
+
+### ✅ Test 3 — Multiple mismatches
+POST http://localhost:3000/api/generate-response
+Content-Type: application/json
+
+{
+  "notice": {
+    "type": "DRC-01",
+    "gstin": "29ABCDE1234F1Z5",
+    "sections": ["Section 73", "Section 50"],
+    "date": "2024-02-10",
+    "tax_period": "FY 2022-23",
+    "amount": "580000"
+  },
+  "mismatches": [
+    {
+      "field": "GSTR-1 vs 3B",
+      "diff": "340000",
+      "month": "Aug 2022"
+    },
+    {
+      "field": "ITC claimed vs 2A",
+      "diff": "240000",
+      "month": "Sep 2022"
+    }
+  ]
+}
+
+###
+
+### ✅ Test 4 — No mismatches (clean taxpayer)
+POST http://localhost:3000/api/generate-response
+Content-Type: application/json
+
+{
+  "notice": {
+    "type": "SCN",
+    "gstin": "07AAACR0515R1ZS",
+    "sections": ["Section 61"],
+    "date": "2024-03-01",
+    "tax_period": "Q3 FY 2023-24"
+  },
+  "mismatches": []
+}
+
+###
+
+### ❌ Test 5 — Missing GSTIN (should return error)
+POST http://localhost:3000/api/generate-response
+Content-Type: application/json
+
+{
+  "notice": {
+    "type": "SCN"
+  }
+}

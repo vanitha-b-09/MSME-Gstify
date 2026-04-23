@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>GST AI Response Engine</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#F5F0E8;
+  --surface:#FFFFFF;
+  --dark:#1A1410;
+  --brown:#6B4226;
+  --amber:#C8862A;
+  --amber-light:#F5E6C8;
+  --green:#2D6A4F;
+  --green-light:#D8F3DC;
+  --red:#C0392B;
+  --red-light:#FDECEA;
+  --border:#E0D5C5;
+  --text:#2C2416;
+  --muted:#8B7355;
+  --mono:'DM Mono',monospace;
+  --serif:'Playfair Display',serif;
+  --sans:'DM Sans',sans-serif;
+}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--sans);
+  min-height:100vh;
+  background-image: radial-gradient(ellipse at 20% 50%, rgba(200,134,42,0.08) 0%, transparent 60%),
+                    radial-gradient(ellipse at 80% 20%, rgba(107,66,38,0.06) 0%, transparent 50%);
+}
+
+/* Header */
+header{
+  background:var(--dark);
+  padding:20px 40px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  position:sticky;
+  top:0;
+  z-index:100;
+}
+.logo{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+.logo-icon{
+  width:40px;height:40px;
+  background:var(--amber);
+  border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:20px;
+}
+.logo-text{
+  font-family:var(--serif);
+  font-size:20px;
+  color:#FFF;
+  letter-spacing:-0.3px;
+}
+.logo-sub{
+  font-size:11px;
+  color:rgba(255,255,255,0.4);
+  font-family:var(--mono);
+  letter-spacing:.1em;
+}
+.status-pill{
+  display:flex;align-items:center;gap:8px;
+  background:rgba(255,255,255,0.08);
+  border:1px solid rgba(255,255,255,0.12);
+  padding:6px 14px;border-radius:20px;
+  font-size:12px;color:rgba(255,255,255,0.7);
+  font-family:var(--mono);
+}
+.status-dot{
+  width:7px;height:7px;border-radius:50%;
+  background:#2ECC71;
+  box-shadow:0 0 6px #2ECC71;
+  animation:pulse 2s infinite;
+}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+/* Layout */
+.container{max-width:1200px;margin:0 auto;padding:48px 40px}
+
+.hero{text-align:center;margin-bottom:56px}
+.hero-tag{
+  display:inline-block;
+  font-family:var(--mono);
+  font-size:11px;
+  letter-spacing:.15em;
+  color:var(--amber);
+  background:var(--amber-light);
+  border:1px solid rgba(200,134,42,0.3);
+  padding:5px 16px;border-radius:20px;
+  margin-bottom:20px;
+  text-transform:uppercase;
+}
+.hero h1{
+  font-family:var(--serif);
+  font-size:52px;
+  font-weight:900;
+  line-height:1.1;
+  color:var(--dark);
+  margin-bottom:12px;
+}
+.hero h1 span{color:var(--amber)}
+.hero p{font-size:17px;color:var(--muted);max-width:500px;margin:0 auto}
+
+/* Grid */
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:32px;align-items:start}
+
+/* Card */
+.card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:20px;
+  padding:32px;
+  box-shadow:0 4px 24px rgba(0,0,0,0.06);
+}
+.card-title{
+  font-family:var(--serif);
+  font-size:22px;
+  font-weight:700;
+  color:var(--dark);
+  margin-bottom:6px;
+}
+.card-sub{font-size:13px;color:var(--muted);margin-bottom:28px}
+
+/* Form */
+.field{margin-bottom:20px}
+label{
+  display:block;
+  font-size:12px;
+  font-weight:500;
+  color:var(--muted);
+  font-family:var(--mono);
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  margin-bottom:8px;
+}
+input,select,textarea{
+  width:100%;
+  padding:12px 16px;
+  border:1.5px solid var(--border);
+  border-radius:10px;
+  font-family:var(--sans);
+  font-size:14px;
+  color:var(--text);
+  background:var(--bg);
+  transition:border-color .2s, box-shadow .2s;
+  outline:none;
+}
+input:focus,select:focus,textarea:focus{
+  border-color:var(--amber);
+  box-shadow:0 0 0 3px rgba(200,134,42,0.12);
+  background:#fff;
+}
+textarea{resize:vertical;min-height:80px}
+
+.row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+
+/* Mismatch */
+.mismatch-list{display:flex;flex-direction:column;gap:10px;margin-bottom:16px}
+.mismatch-item{
+  background:var(--bg);
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:12px 14px;
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr auto;
+  gap:10px;
+  align-items:center;
+}
+.mismatch-item input{
+  padding:8px 10px;
+  font-size:13px;
+  background:#fff;
+}
+.remove-btn{
+  width:28px;height:28px;
+  border:none;background:var(--red-light);
+  color:var(--red);border-radius:6px;
+  cursor:pointer;font-size:16px;
+  display:flex;align-items:center;justify-content:center;
+  transition:background .2s;flex-shrink:0;
+}
+.remove-btn:hover{background:#f5c6c2}
+.add-btn{
+  width:100%;padding:10px;
+  border:1.5px dashed var(--border);
+  border-radius:10px;background:transparent;
+  color:var(--muted);font-family:var(--sans);
+  font-size:13px;cursor:pointer;
+  transition:all .2s;
+}
+.add-btn:hover{border-color:var(--amber);color:var(--amber);background:var(--amber-light)}
+
+/* Submit */
+.submit-btn{
+  width:100%;padding:16px;
+  background:var(--dark);
+  color:#fff;border:none;
+  border-radius:12px;
+  font-family:var(--serif);
+  font-size:18px;font-weight:700;
+  cursor:pointer;
+  margin-top:24px;
+  transition:all .2s;
+  position:relative;
+  overflow:hidden;
+}
+.submit-btn:hover{background:var(--brown);transform:translateY(-1px);box-shadow:0 8px 24px rgba(0,0,0,0.2)}
+.submit-btn:disabled{background:#ccc;cursor:not-allowed;transform:none;box-shadow:none}
+.submit-btn .btn-inner{display:flex;align-items:center;justify-content:center;gap:10px}
+.spinner{
+  width:18px;height:18px;
+  border:2px solid rgba(255,255,255,0.3);
+  border-top-color:#fff;
+  border-radius:50%;
+  animation:spin .8s linear infinite;
+  display:none;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Output card */
+.output-card{display:none}
+.output-card.visible{display:block}
+
+/* Status bar */
+.status-bar{
+  display:flex;align-items:center;gap:10px;
+  padding:12px 16px;border-radius:10px;
+  margin-bottom:24px;font-size:13px;font-weight:500;
+}
+.status-bar.success{background:var(--green-light);color:var(--green)}
+.status-bar.error{background:var(--red-light);color:var(--red)}
+
+/* Summary section */
+.section-label{
+  font-family:var(--mono);
+  font-size:11px;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  color:var(--muted);
+  margin-bottom:10px;
+}
+.severity-badge{
+  display:inline-block;
+  padding:4px 12px;border-radius:20px;
+  font-size:12px;font-weight:500;
+  font-family:var(--mono);
+}
+.severity-Low{background:#D8F3DC;color:#2D6A4F}
+.severity-Medium{background:#FFF3CD;color:#856404}
+.severity-High{background:#FDECEA;color:#C0392B}
+
+.allegation-box{
+  background:var(--amber-light);
+  border:1px solid rgba(200,134,42,0.3);
+  border-radius:12px;
+  padding:16px;
+  font-size:14px;
+  line-height:1.6;
+  color:var(--brown);
+  margin-bottom:20px;
+}
+
+.defense-list{list-style:none;display:flex;flex-direction:column;gap:8px;margin-bottom:24px}
+.defense-list li{
+  display:flex;gap:10px;align-items:flex-start;
+  font-size:13px;color:var(--text);
+}
+.defense-list li::before{
+  content:'✓';
+  color:var(--green);
+  font-weight:700;
+  flex-shrink:0;
+  margin-top:1px;
+}
+
+/* Draft letter */
+.draft-box{
+  background:var(--bg);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:24px;
+  font-family:var(--mono);
+  font-size:13px;
+  line-height:1.8;
+  color:var(--text);
+  white-space:pre-wrap;
+  word-break:break-word;
+  max-height:400px;
+  overflow-y:auto;
+  margin-bottom:16px;
+}
+
+.tags{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px}
+.tag{
+  padding:4px 12px;border-radius:20px;
+  background:var(--dark);color:#fff;
+  font-size:11px;font-family:var(--mono);
+}
+
+/* Copy button */
+.copy-btn{
+  display:flex;align-items:center;gap:8px;
+  padding:10px 20px;
+  border:1.5px solid var(--border);
+  border-radius:10px;background:transparent;
+  color:var(--muted);font-family:var(--sans);
+  font-size:13px;cursor:pointer;
+  transition:all .2s;
+}
+.copy-btn:hover{border-color:var(--amber);color:var(--amber)}
+.copy-btn.copied{border-color:var(--green);color:var(--green)}
+
+/* Empty state */
+.empty-state{
+  text-align:center;
+  padding:60px 20px;
+  color:var(--muted);
+}
+.empty-icon{font-size:48px;margin-bottom:16px;opacity:.4}
+.empty-text{font-size:15px}
+
+/* Error */
+.error-box{
+  background:var(--red-light);
+  border:1px solid rgba(192,57,43,0.2);
+  border-radius:12px;
+  padding:16px;
+  color:var(--red);
+  font-size:13px;
+  display:none;
+  margin-top:16px;
+}
+
+@media(max-width:768px){
+  .grid{grid-template-columns:1fr}
+  .hero h1{font-size:36px}
+  .container{padding:32px 20px}
+  header{padding:16px 20px}
+  .mismatch-item{grid-template-columns:1fr 1fr;grid-template-rows:auto auto}
+  .row{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">⚖️</div>
+    <div>
+      <div class="logo-text">GST AI Engine</div>
+      <div class="logo-sub">Module 5 — Response Generator</div>
+    </div>
+  </div>
+  <div class="status-pill">
+    <div class="status-dot"></div>
+    <span id="server-status">Connecting...</span>
+  </div>
+</header>
+
+<div class="container">
+  <div class="hero">
+    <div class="hero-tag">AI Powered · Free · Runs Locally</div>
+    <h1>GST Notice <span>Reply Generator</span></h1>
+    <p>Enter your GST notice details and get a professional legal reply draft instantly</p>
+  </div>
+
+  <div class="grid">
+
+    <!-- INPUT FORM -->
+    <div class="card">
+      <div class="card-title">Notice Details</div>
+      <div class="card-sub">Fill in the GST notice information below</div>
+
+      <div class="field">
+        <label>Notice Type</label>
+        <select id="notice-type">
+          <option value="SCN">SCN — Show Cause Notice</option>
+          <option value="DRC-01">DRC-01 — Demand Notice</option>
+          <option value="ASMT-10">ASMT-10 — Scrutiny Notice</option>
+          <option value="CMP-05">CMP-05 — Composition Notice</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>GSTIN</label>
+        <input type="text" id="gstin" placeholder="e.g. 27AAPFU0939F1ZV" maxlength="15"/>
+      </div>
+
+      <div class="row">
+        <div class="field">
+          <label>Tax Period</label>
+          <input type="text" id="tax-period" placeholder="e.g. Oct 2023"/>
+        </div>
+        <div class="field">
+          <label>Amount Disputed (₹)</label>
+          <input type="number" id="amount" placeholder="e.g. 240000"/>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Sections Invoked</label>
+        <input type="text" id="sections" placeholder="e.g. Section 73, Section 50"/>
+      </div>
+
+      <div class="field">
+        <label>Notice Date</label>
+        <input type="date" id="notice-date"/>
+      </div>
+
+      <!-- Mismatches -->
+      <div class="field">
+        <label>Data Mismatches</label>
+        <div class="mismatch-list" id="mismatch-list">
+          <div class="mismatch-item" id="mismatch-0">
+            <input type="text" placeholder="Field (e.g. GSTR-1 vs 3B)" class="m-field"/>
+            <input type="number" placeholder="Diff (₹)" class="m-diff"/>
+            <input type="text" placeholder="Month (e.g. Oct 2023)" class="m-month"/>
+            <button class="remove-btn" onclick="removeMismatch(0)">×</button>
+          </div>
+        </div>
+        <button class="add-btn" onclick="addMismatch()">+ Add Mismatch</button>
+      </div>
+
+      <div class="error-box" id="error-box">⚠️ <span id="error-msg"></span></div>
+
+      <button class="submit-btn" id="submit-btn" onclick="generateReply()">
+        <div class="btn-inner">
+          <div class="spinner" id="spinner"></div>
+          <span id="btn-text">Generate AI Reply ✦</span>
+        </div>
+      </button>
+    </div>
+
+    <!-- OUTPUT -->
+    <div>
+      <!-- Empty state -->
+      <div class="card" id="empty-state">
+        <div class="empty-state">
+          <div class="empty-icon">📄</div>
+          <div class="empty-text">Your AI-generated reply will appear here</div>
+        </div>
+      </div>
+
+      <!-- Output card -->
+      <div class="card output-card" id="output-card">
+
+        <div class="status-bar success" id="status-bar">
+          ✅ Reply generated successfully
+        </div>
+
+        <!-- Summary -->
+        <div class="section-label">Notice Summary</div>
+        <div class="allegation-box" id="allegation-box"></div>
+
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+          <div class="section-label" style="margin:0">Severity</div>
+          <span class="severity-badge" id="severity-badge"></span>
+        </div>
+
+        <!-- Defense Points -->
+        <div class="section-label">Key Defense Points</div>
+        <ul class="defense-list" id="defense-list"></ul>
+
+        <!-- Legal References -->
+        <div class="section-label">Legal References</div>
+        <div class="tags" id="legal-tags"></div>
+
+        <!-- Draft Letter -->
+        <div class="section-label">Draft Reply Letter</div>
+        <div class="draft-box" id="draft-body"></div>
+
+        <button class="copy-btn" id="copy-btn" onclick="copyDraft()">
+          📋 Copy Draft Letter
+        </button>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+let mismatchCount = 1;
+
+// Check server status on load
+async function checkServer() {
+  try {
+    const res = await fetch("http://localhost:3000/");
+    if (res.ok) {
+      document.getElementById("server-status").textContent = "AI Engine Online";
+    }
+  } catch {
+    document.getElementById("server-status").textContent = "Server Offline — run npm start";
+    document.querySelector(".status-dot").style.background = "#e74c3c";
+    document.querySelector(".status-dot").style.boxShadow = "0 0 6px #e74c3c";
+  }
+}
+checkServer();
+
+function addMismatch() {
+  const list = document.getElementById("mismatch-list");
+  const id = mismatchCount++;
+  const div = document.createElement("div");
+  div.className = "mismatch-item";
+  div.id = `mismatch-${id}`;
+  div.innerHTML = `
+    <input type="text" placeholder="Field (e.g. GSTR-1 vs 3B)" class="m-field"/>
+    <input type="number" placeholder="Diff (₹)" class="m-diff"/>
+    <input type="text" placeholder="Month (e.g. Oct 2023)" class="m-month"/>
+    <button class="remove-btn" onclick="removeMismatch(${id})">×</button>
+  `;
+  list.appendChild(div);
+}
+
+function removeMismatch(id) {
+  const el = document.getElementById(`mismatch-${id}`);
+  if (el) el.remove();
+}
+
+function getMismatches() {
+  const items = document.querySelectorAll(".mismatch-item");
+  const result = [];
+  items.forEach(item => {
+    const field = item.querySelector(".m-field").value.trim();
+    const diff = item.querySelector(".m-diff").value.trim();
+    const month = item.querySelector(".m-month").value.trim();
+    if (field && diff && month) {
+      result.push({ field, diff, month });
+    }
+  });
+  return result;
+}
+
+async function generateReply() {
+  const gstin = document.getElementById("gstin").value.trim();
+  const noticeType = document.getElementById("notice-type").value;
+  const taxPeriod = document.getElementById("tax-period").value.trim();
+  const amount = document.getElementById("amount").value.trim();
+  const sectionsRaw = document.getElementById("sections").value.trim();
+  const date = document.getElementById("notice-date").value;
+
+  // Validate
+  if (!gstin) return showError("Please enter GSTIN");
+  if (!taxPeriod) return showError("Please enter Tax Period");
+  hideError();
+
+  const sections = sectionsRaw
+    ? sectionsRaw.split(",").map(s => s.trim())
+    : ["Section 73"];
+
+  const payload = {
+    notice: {
+      type: noticeType,
+      gstin,
+      sections,
+      date: date || new Date().toISOString().split("T")[0],
+      tax_period: taxPeriod,
+      amount: amount || "0",
+    },
+    mismatches: getMismatches(),
+  };
+
+  // Loading state
+  setLoading(true);
+  document.getElementById("empty-state").style.display = "none";
+  document.getElementById("output-card").classList.remove("visible");
+
+  try {
+    const res = await fetch("http://localhost:3000/api/generate-response", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok || !data.success) {
+      throw new Error(data.error || "Something went wrong");
+    }
+
+    showOutput(data);
+
+  } catch (err) {
+    showError(err.message);
+    document.getElementById("empty-state").style.display = "block";
+  } finally {
+    setLoading(false);
+  }
+}
+
+function showOutput(data) {
+  // Summary
+  document.getElementById("allegation-box").textContent =
+    data.summary?.allegation_summary || "Notice processed successfully.";
+
+  // Severity
+  const severity = data.summary?.severity || "Medium";
+  const badge = document.getElementById("severity-badge");
+  badge.textContent = severity;
+  badge.className = `severity-badge severity-${severity}`;
+
+  // Defense points
+  const defenseList = document.getElementById("defense-list");
+  defenseList.innerHTML = "";
+  (data.summary?.key_defense_points || []).forEach(point => {
+    const li = document.createElement("li");
+    li.textContent = point;
+    defenseList.appendChild(li);
+  });
+
+  // Legal references
+  const tagsEl = document.getElementById("legal-tags");
+  tagsEl.innerHTML = "";
+  (data.draft?.legal_references || []).forEach(ref => {
+    const span = document.createElement("span");
+    span.className = "tag";
+    span.textContent = ref;
+    tagsEl.appendChild(span);
+  });
+
+  // Draft body
+  document.getElementById("draft-body").textContent =
+    data.draft?.full_draft_body || "Draft not available.";
+
+  // Show output
+  document.getElementById("output-card").classList.add("visible");
+  document.getElementById("output-card").scrollIntoView({ behavior: "smooth" });
+}
+
+function setLoading(loading) {
+  const btn = document.getElementById("submit-btn");
+  const spinner = document.getElementById("spinner");
+  const btnText = document.getElementById("btn-text");
+  btn.disabled = loading;
+  spinner.style.display = loading ? "block" : "none";
+  btnText.textContent = loading ? "Generating..." : "Generate AI Reply ✦";
+}
+
+function showError(msg) {
+  const box = document.getElementById("error-box");
+  document.getElementById("error-msg").textContent = msg;
+  box.style.display = "block";
+}
+
+function hideError() {
+  document.getElementById("error-box").style.display = "none";
+}
+
+function copyDraft() {
+  const text = document.getElementById("draft-body").textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById("copy-btn");
+    btn.textContent = "✅ Copied!";
+    btn.classList.add("copied");
+    setTimeout(() => {
+      btn.textContent = "📋 Copy Draft Letter";
+      btn.classList.remove("copied");
+    }, 2000);
+  });
+}
+</script>
+</body>
+</html>
